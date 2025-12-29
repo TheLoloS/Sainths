@@ -23,8 +23,10 @@
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./build/style.css --watch",
     "deploy": "gh-pages -d ./build",
     "start": "react-scripts start",
+    "start:dev": "concurrently \"npm run start\" \"cd backend && npm start\"",
     "build": "react-scripts build & npx tailwindcss -i ./src/index.css -o ./build/style.css",
     "test": "react-scripts test",
+    "echo": "echo .",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -46,6 +48,7 @@
     ]
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "tailwindcss": "^3.2.4"
   }
 }

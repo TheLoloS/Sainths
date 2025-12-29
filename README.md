@@ -35,3 +35,25 @@ Users participate in the game by connecting their mobile device and viewer score
 ## Authors
 
 - [@TheLoloS 💣](https://github.com/TheLoloS)
+
+## Getting Started
+
+1.  Install dependencies:
+    ```bash
+    npm install
+    cd backend && npm install
+    ```
+2.  Create `.env` files:
+    - Root `.env`:
+      ```
+      REACT_APP_BACKEND_URL=http://localhost:3001
+      ```
+    - `backend/.env`:
+      ```
+      PORT=3001
+      CLIENT_ORIGIN_URL=http://localhost:3000
+      ```
+3.  Run development server:
+    ```bash
+    npm run start:dev
+    ```
