@@ -39,7 +39,7 @@ export default function PlayersList() {
           <div className="relative">
             <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/30">
               <Image
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.login}`}
+                src={`https://api.dicebear.com/9.x/dylan/svg?seed=${player.login}`}
                 alt={`Avatar ${player.login}`}
                 width={48}
                 height={48}

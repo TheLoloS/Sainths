@@ -4,20 +4,44 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import socket from '@/lib/socket';
 import SetGameState from '@/lib/SetGameState';
+import { saveSession, getSession, clearSession } from '@/lib/sessionManager';
+import { useGameStore } from '@/lib/stores/gameStore';
 import UserWaitRoom from './UserWaitRoom';
 import { GameData, SocketMessage } from '@/types';
 
 const JOIN_TIMEOUT = 5000; // 5 sekund timeout
 
 export default function SendVerifyCode() {
+  const gameData = useGameStore((state) => state.gameData);
   const [codeVerify, setVerifyCode] = useState('');
   const [joinToGame, setJoinToGame] = useState<GameData | false>(false);
   const [login, setLogin] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Sprawdź początkowy stan połączenia
+    setIsConnected(socket.connected);
+    
+    // Sprawdź czy jest zapisana sesja i gameData jest już załadowane
+    const session = getSession();
+    if (session && !session.isHost && gameData?.id) {
+      console.log('Przywracanie sesji gracza z gameStore');
+      setJoinToGame(gameData);
+    }
+
+    socket.on('connect', () => {
+      console.log('Socket połączony');
+      setIsConnected(true);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket rozłączony');
+      setIsConnected(false);
+    });
+
     socket.on('joinToGame', (data: GameData) => {
       // Sukces - wyczyść timeout
       if (timeoutRef.current) {
@@ -27,6 +51,16 @@ export default function SendVerifyCode() {
       setJoinToGame(data);
       setPending(false);
       setError(null);
+      
+      // Zapisz sesję
+      if (data.id) {
+        saveSession({
+          gameId: data.id,
+          login: login || localStorage.getItem('login') || '',
+          isHost: false,
+        });
+      }
+      
       console.table([data]);
     });
 
@@ -42,14 +76,18 @@ export default function SendVerifyCode() {
       }
     });
 
-    socket.on('connect_error', () => {
+    socket.on('connect_error', (err) => {
+      console.error('Błąd połączenia:', err.message);
+      setIsConnected(false);
       if (pending) {
         setPending(false);
-        setError('Nie można połączyć się z serwerem. Sprawdź czy backend jest uruchomiony.');
+        setError(`Nie można połączyć się z serwerem: ${err.message}`);
       }
     });
 
     return () => {
+      socket.off('connect');
+      socket.off('disconnect');
       socket.off('joinToGame');
       socket.off('message');
       socket.off('connect_error');
@@ -63,6 +101,15 @@ export default function SendVerifyCode() {
     e.preventDefault();
     setError(null);
     setPending(true);
+    
+    // Sprawdź czy socket jest połączony
+    if (!socket.connected) {
+      setError('Brak połączenia z serwerem. Upewnij się że backend jest uruchomiony i jesteś w tej samej sieci.');
+      setPending(false);
+      return;
+    }
+    
+    console.log('Wysyłanie joinToGame:', { id: codeVerify, login: login });
     
     // Ustaw timeout 5 sekund
     timeoutRef.current = setTimeout(() => {
@@ -209,6 +256,18 @@ export default function SendVerifyCode() {
 
           {/* Informacja */}
           <div className="mt-8 pt-6 border-t border-white/20">
+            {/* Status połączenia */}
+            <div className="flex items-center gap-2 mb-4">
+              <motion.div
+                animate={{ scale: isConnected ? [1, 1.2, 1] : 1 }}
+                transition={{ repeat: isConnected ? Infinity : 0, duration: 2 }}
+                className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}
+              />
+              <span className={`text-sm ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                {isConnected ? 'Połączono z serwerem' : 'Brak połączenia z serwerem'}
+              </span>
+            </div>
+            
             <div className="flex items-start gap-3 text-white/60 text-sm">
               <span className="text-xl">💡</span>
               <p>

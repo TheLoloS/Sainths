@@ -136,14 +136,68 @@ export default function registerSocketHandlers(io, socket) {
   socket.on("startGameOne", (data) => {
     let found = roomService.findRoomByIdAndKey(data?.id, data?.roomKey);
     if (found) {
+        // Zapisz stan gry
+        found.gameState = {
+          isPlaying: true,
+          startTime: Date.now(),
+          timeLeft: 60
+        };
         socket.in("Room_" + found.id).emit("startGameOne");
+    }
+  });
+
+  // Synchronizacja czasu
+  socket.on("syncTimer", (data) => {
+    let found = roomService.findRoomByIdAndKey(data?.id, data?.roomKey);
+    if (found) {
+      found.gameState = found.gameState || {};
+      found.gameState.timeLeft = data.timeLeft;
+      socket.in("Room_" + found.id).emit("timerSync", data.timeLeft);
+    }
+  });
+
+  // Zapytanie o status gry (dla graczy po odświeżeniu)
+  socket.on("requestGameStatus", (data) => {
+    let found = roomService.findRoomById(data.gameId);
+    if (found && found.gameState) {
+      socket.emit("gameStatus", {
+        isPlaying: found.gameState.isPlaying,
+        timeLeft: found.gameState.timeLeft || 60
+      });
     }
   });
 
   socket.on("timeEndGameOne", (data) => {
     let found = roomService.findRoomByIdAndKey(data?.id, data?.roomKey);
     if (found) {
+        // Zakończ stan gry
+        if (found.gameState) {
+          found.gameState.isPlaying = false;
+        }
         socket.in("Room_" + found.id).emit("timeEndGameOne");
+        socket.emit("gameRoundEnded");
+    }
+  });
+
+  // Odbieranie wyników od graczy
+  socket.on("gameOneScore", (data) => {
+    let found = roomService.findRoomById(data?.id);
+    if (found) {
+      // Znajdź gracza i zapisz wynik
+      const user = found.users.find(u => u.socketID === socket.id);
+      if (user) {
+        user.currentScore = data.score;
+        user.points = (user.points || 0) + Math.round(data.score / 10); // Dodaj punkty
+        
+        // Wyślij wynik do hosta
+        io.to("Room_" + found.id).emit("playerScore", {
+          login: user.login,
+          score: data.score
+        });
+        
+        // Aktualizuj tabelę
+        io.to("Room_" + found.id).emit("refreshTab", found);
+      }
     }
   });
 
@@ -155,6 +209,63 @@ export default function registerSocketHandlers(io, socket) {
     const b = a?.users.find((user) => user.socketID === socket.id);
     if (b) {
       b.onlineStatus = false;
+    }
+  });
+
+  // Przywracanie sesji gracza po odświeżeniu
+  socket.on("rejoinGame", (data) => {
+    let found = roomService.findRoomById(data.id);
+    
+    if (found) {
+      const existingUser = found.users.find((user) => user.login === data.login);
+      
+      if (existingUser) {
+        socket.join("Room_" + found.id);
+        existingUser.socketID = socket.id;
+        existingUser.onlineStatus = true;
+        
+        socket.emit("rejoinSuccess", found);
+        socket.emit("message", {
+          type: "success",
+          title: "Witaj ponownie! 🎄",
+          value: "Sesja przywrócona pomyślnie!",
+        });
+        
+        socket.in("Room_" + found.id).emit("message", {
+          type: "info",
+          title: "Powrót! 🎈",
+          value: data.login + " wrócił do gry!",
+        });
+        socket.in("Room_" + found.id).emit("refreshTab", found);
+      } else {
+        socket.emit("rejoinFailed");
+      }
+    } else {
+      socket.emit("rejoinFailed");
+    }
+  });
+
+  // Przywracanie gry hosta po odświeżeniu
+  socket.on("restoreGame", (data) => {
+    let found = roomService.findRoomById(data.gameId);
+    
+    if (found) {
+      // Sprawdź czy to ten sam host (po IP)
+      if (found.mainUser === socket.handshake.address) {
+        socket.join("Room_" + found.id);
+        roomService.updateMainUserSocket(found, socket.id);
+        
+        socket.emit("restoreGameSuccess", found);
+        socket.emit("message", {
+          type: "success",
+          title: "Gra przywrócona! 🎄",
+          value: "Twoja gra nadal istnieje!",
+        });
+      } else {
+        socket.emit("restoreGameFailed");
+      }
+    } else {
+      socket.emit("restoreGameFailed");
     }
   });
 }

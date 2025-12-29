@@ -1,0 +1,1 @@
+dodac animatepresenc do głównego aa (onexitbefore) i exit anim do kazdego elementu route (zrobic jak jauz bedzie kilka stage)

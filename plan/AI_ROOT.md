@@ -143,4 +143,23 @@ Skipping generating a fallback font.
 
 [x] dobrze teraz zajmijmy się wyglądem w /local/user i dopasujmy go do 2 paneli które już zrobiliśmy
 
-[] ogólnie żeby nie było problemów chciałbym żeby backend przyjmował z dowlonego adresu ip a nie tylko localhost. zrób to w backendzie i frontendzie i żeby cors tego wszystkiego nie blokowało bo choc na kompie moge sie połaczycv z serwerewm to niestety z telefonu juz nie bardzo bo cors to blokuje. do tego chciałbym żeby był limit 5 sekund na dołaczenie a jezeli wystapi jakis bład to powinien on byc normalnie pokazywany a nie ładowanie w nieskonczoność
+[x] ogólnie żeby nie było problemów chciałbym żeby backend przyjmował z dowlonego adresu ip a nie tylko localhost. zrób to w backendzie i frontendzie i żeby cors tego wszystkiego nie blokowało bo choc na kompie moge sie połaczycv z serwerewm to niestety z telefonu juz nie bardzo bo cors to blokuje. do tego chciałbym żeby był limit 5 sekund na dołaczenie a jezeli wystapi jakis bład to powinien on byc normalnie pokazywany a nie ładowanie w nieskonczoność
+
+[x] niestety dalej nie moge sie połaczyć z telefonu choć jestem w tej samej sieci i dalej nie otrzymuje ani błedu ani nic tylko ładowanie. nie mam też żadnych komunikatów na serwerze ani nic ze ktos próbuje dołaczyć
+
+[x] dobra teraz tak moge sie juz połaczyc z serwerem ale kiedy odswierze tam gry znowu karze mi wpisywac kod i pseudonim a to nie powinno tak działać tylko powinno spowrotem wracac na ten sam stage w którym było tak jak we wszystkich na swiecie grach. trzeba zrobic to profesjonalnie.
+
+[x] dobra teraz musisz przeanalizowac gry poprawić im ui i ux oraz naprawić je wszystkie tak żeby realnie działały. jezeli trzeba to wyedytuj też backend zeby wszystko działało jak należy.
+
+[x] dobra to tak wybrałem gre uzupełnij piosenke i teraz tak:
+- kiedy usupełnimy juz słowo dobrze powinno nas przerzucac do nastepnego słowa.
+- jezeli rozpocznie sie gra i odwierze strone dostaje powiadomienie ze racvz wrócił do gry ale tak jakby mam tylko widok oczekiwania a nie gre
+- czas gry powinien byc liczony serwero (bo jak widze jezeli host odwierzy strone to czas wraca na minute spowrotem)
+- po zakonczeniu czasu nie mozna przejść dalej jako host (nie ma nic w stylu nastepna piosenka itp)
+- nie pokazuja sie po zakonczeniu wyniki realne
+
+[] dobra teraz mamy problem z polskimi znakami ogólnie kazde słowo które zawierta polskie znaki nie jest akceptowane w grze uzupełnij piosenke. np "święta" nie łapie ale juz "swieta" tak. trzeba to naprawić nie wazne czy uzytkownik wpisze swieta czy święta to powinno byc akceptowane
+
+[] dodatkowo prosze cie zebyś wyszukał na necie innych kolend po polsku żeby zrobić ich więcej ja potem dodam piosenki w mp3 tylko napisz mi tu potem w jakich plikach są te piosenki i tak dalej zebym mógł sam tez je edytować jak czas itp
+
+[] dodatkowo chce zeby czas danej piosenki mógłbyc ustalany przez hosta przed rozpoczęciem gry a nie był na sztywno ustawiony w kodzie

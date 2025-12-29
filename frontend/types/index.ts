@@ -5,6 +5,7 @@ export interface User {
 
 export interface GameData {
   id?: string;
+  roomKey?: string;
   roomStage?: number;
   users?: User[];
   gameType?: string;
@@ -16,7 +17,7 @@ export interface AlertData {
 }
 
 export interface SocketMessage {
-  type: 'error' | 'info' | 'succes';
+  type: 'error' | 'info' | 'succes' | 'success';
   title: string;
   value: string;
 }
@@ -40,4 +41,6 @@ export interface Question {
 export interface Song {
   title: string;
   data: string[];
+  audioFile?: string;
+  duration?: number;
 }

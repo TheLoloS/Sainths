@@ -20,7 +20,7 @@ export default function TabListRow() {
               <div className="avatar">
                 <div className="mask mask-squircle w-12 h-12">
                   <Image
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.login}`}
+                    src={`https://api.dicebear.com/9.x/dylan/svg?seed=${player.login}`}
                     alt="Avatar"
                     width={48}
                     height={48}

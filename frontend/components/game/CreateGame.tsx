@@ -1,12 +1,34 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/lib/stores/gameStore';
 import socket from '@/lib/socket';
+import { saveSession, getSession } from '@/lib/sessionManager';
 import WaitRoom from './WaitRoom';
 
 export default function CreateGame() {
   const gameData = useGameStore((state) => state.gameData);
+
+  // Zapisz sesję hosta gdy gra zostanie utworzona
+  useEffect(() => {
+    if (gameData.id) {
+      saveSession({
+        gameId: gameData.id,
+        login: 'HOST',
+        isHost: true,
+      });
+    }
+  }, [gameData.id]);
+
+  // Sprawdź czy jest zapisana sesja hosta
+  useEffect(() => {
+    const session = getSession();
+    if (session && session.isHost && !gameData.id) {
+      // Spróbuj przywrócić grę
+      socket.emit('restoreGame', { gameId: session.gameId });
+    }
+  }, []);
 
   function eventHandler() {
     socket.emit('createGame');
